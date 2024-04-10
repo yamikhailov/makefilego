@@ -1,8 +1,15 @@
 NAME=$(shell basename $(shell git remote get-url origin) .git)
-
+REGISTRY=yamikhailov
+VERSION=1.0.0
 
 deps:
 	go mod download
+
+
+linux: linux/amd64
+arm: linux/arm64
+macos: darwin/arm64
+windows: windows/amd64
 
 linux/amd64: deps
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build  -v  -o $(NAME)
@@ -16,9 +23,12 @@ darwin/arm64: deps
 windows/amd64: deps
 	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build  -v  -o $(NAME)
 
+image:
+	docker build -t $(REGISTRY)/$(NAME):$(VERSION) .	
 
 test:
 	go test -v
 
 clean:
-	rm $(NAME)
+	docker rmi $(REGISTRY)/$(NAME):$(VERSION)
+	
